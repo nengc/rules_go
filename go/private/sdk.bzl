@@ -177,11 +177,15 @@ def _remote_sdk(ctx, urls, strip_prefix, sha256):
     if len(urls) == 0:
         fail("no urls specified")
     ctx.report_progress("Downloading and extracting Go toolchain")
-    ctx.download_and_extract(
+    ctx.download(
         url = urls,
-        stripPrefix = strip_prefix,
         sha256 = sha256,
+        output = "go_sdk.tar.gz",
     )
+    res = ctx.execute(["tar", "-xf", "go_sdk.tar.gz", "--strip-components=1"])
+    if res.return_code:
+        fail("error extracting Go SDK:\n" + res.stdout + res.stderr)
+    ctx.execute(["rm", "go_sdk.tar.gz"])
 
 def _local_sdk(ctx, path):
     for entry in ["src", "pkg", "bin"]:
